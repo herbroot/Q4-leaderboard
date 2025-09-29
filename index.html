@@ -4,10 +4,9 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Multi‑Benchmark Leaderboard</title>
-  <!-- Bootstrap (layout only) -->
-  <link href="./Multi‑Benchmark Leaderboard_files/bootstrap.min.css" rel="stylesheet">
-  <!-- DataTables for sorting/search/pagination -->
-  <link rel="stylesheet" href="./Multi‑Benchmark Leaderboard_files/dataTables.bootstrap5.min.css">
+  <!-- 本地 CSS -->
+  <link rel="stylesheet" href="./assets/bootstrap.min.css" />
+  <link rel="stylesheet" href="./assets/dataTables.bootstrap5.min.css" />
   <style>
     body { background:#f7f9fc; }
     .brand { font-weight:800; letter-spacing:0.3px; }
@@ -227,29 +226,20 @@ Seed-Coder-8B-Instruct,37.40%,31.40%
       </div>
     </div>
   
-    <div class="tab-pane fade active show" role="tabpanel" id="panel-2" aria-labelledby="tab-2" data-raw="model,score,,,,,,,,,,,,,,,,,,,
-XiYanSQL-QwenCoder-32B-2504,69.05%,,,,,,,,,,,,,,,,,,,
-XiYanSQL-QwenCoder-14B,71.14%,,,,,,,,,,,,,,,,,,,
-XiYanSQL-QwenCoder-7B,76.70%,,,,,,,,,,,,,,,,,,,
-Qwen2.5-Coder-7B-Instruct（glmprompt）,74.40%,,,,,,,,,,,,,,,,,,,
-Qwen2.5-Coder-14B-Instruct（glmprompt）,73.26%,,,,,,,,,,,,,,,,,,,
-Qwen2.5-Coder-7B-Instruct（glmprompt）,67.55%,,,,,,,,,,,,,,,,,,,
-Qwen3-Coder-30B-A3B-Instruct,78.20%,,,,,,,,,,,,,,,,,,,
-deepseek-coder-6.7b-instruct,57.65%,,,,,,,,,,,,,,,,,,,
-deepseek-coder-33b-instruct,71.37%,,,,,,,,,,,,,,,,,,,
-CodeLlama-7b-Instruct-hf,26.15%,,,,,,,,,,,,,,,,,,,
-deepseek-coder-33b-instruct,71.37%,,,,,,,,,,,,,,,,,,,
-Seed-Coder-8B-Instruct（glmprompt）,67.73%,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,">
+    <div class="tab-pane fade active show" role="tabpanel" id="panel-2" aria-labelledby="tab-2" data-raw="model,score
+XiYanSQL-QwenCoder-32B-2504,69.05%
+XiYanSQL-QwenCoder-14B,71.14%
+XiYanSQL-QwenCoder-7B,76.70%
+Qwen2.5-Coder-7B-Instruct（glmprompt）,74.40%
+Qwen2.5-Coder-14B-Instruct（glmprompt）,73.26%
+Qwen2.5-Coder-7B-Instruct（glmprompt）,67.55%
+Qwen3-Coder-30B-A3B-Instruct,78.20%
+deepseek-coder-6.7b-instruct,57.65%
+deepseek-coder-33b-instruct,71.37%
+CodeLlama-7b-Instruct-hf,26.15%
+deepseek-coder-33b-instruct,71.37%
+Seed-Coder-8B-Instruct（glmprompt）,67.73%
+">
       <div class="row g-3 align-items-stretch">
         <div class="col-lg-4">
           <div class="dropzone h-100">
@@ -786,11 +776,12 @@ XiYanSQL-QwenCoder-7B,38.61%">
   <!-- Panel Template -->
   <template id="panel-template"></template>
 
-  <script src="./Multi‑Benchmark Leaderboard_files/bootstrap.bundle.min.js.下载"></script>
-  <script src="./Multi‑Benchmark Leaderboard_files/papaparse.min.js.下载"></script>
-  <script src="./Multi‑Benchmark Leaderboard_files/jquery-3.7.1.min.js.下载"></script>
-  <script src="./Multi‑Benchmark Leaderboard_files/jquery.dataTables.min.js.下载"></script>
-  <script src="./Multi‑Benchmark Leaderboard_files/dataTables.bootstrap5.min.js.下载"></script>
+  <!-- 本地 JS（顺序不能乱） -->
+  <script src="./assets/jquery-3.7.1.min.js"></script>
+  <script src="./assets/bootstrap.bundle.min.js"></script>
+  <script src="./assets/papaparse.min.js"></script>
+  <script src="./assets/jquery.dataTables.min.js"></script>
+  <script src="./assets/dataTables.bootstrap5.min.js"></script>
   <script>
     const TAB_IDS = ["panel-1","panel-2","panel-3","panel-4"];
     const LS_PREFIX = 'mb-leaderboard:';
