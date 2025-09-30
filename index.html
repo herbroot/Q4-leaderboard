@@ -23,6 +23,9 @@
     .clean .col-lg-8{ flex:0 0 100%; max-width:100%; }
     .clean .footer-note{ display:none !important; }
     .clean #btnToggleClean{ display:none!important; }
+    .dataTables_length, .dataTables_info { display: none !important; }
+    .subtle.small.mt-2 { display: none !important; }
+    .card .card-body > .d-flex .subtle { display: none !important; }
   </style>
 </head>
 <body class="clean">
@@ -47,9 +50,9 @@
     <div class="tab-content pt-3" id="benchContent">
     <div class="tab-pane fade" role="tabpanel" id="panel-1" aria-labelledby="tab-1" data-raw="model,exec,exact match
 Qwen3-Coder-30B-A3B-Instruct,49.50%,42.60%
-Qwen2___5-Coder-14B-Instruct,56.20%,50.80%
-Qwen2___5-Coder-32B-Instruct,56.20%,50.80%
-Qwen2___5-Coder-32B-Instruct,61.10%,53.60%
+Qwen2.5-Coder-14B-Instruct,56.20%,50.80%
+Qwen2.5-Coder-7B-Instruct,56.20%,50.80%
+Qwen2.5-Coder-32B-Instruct,61.10%,53.60%
 XiYanSQL-QwenCoder-32B-2504,79.40%,75.60%
 XiYanSQL-QwenCoder-14B-2504,77.90%,74.60%
 XiYanSQL-QwenCoder-7B-2504,53.80%,50.90%
@@ -856,17 +859,30 @@ XiYanSQL-QwenCoder-7B,38.61%">
           <td>${escapeHtml(r.notes || '')}</td>`;
         tbody[0].appendChild(tr);
       });
-      table.DataTable({
+      const dt = table.DataTable({
         pageLength: 25,
         order: [[3,'desc']],
         deferRender: true,
         autoWidth: true,
         scrollX: true,
+
+        // 让 Search 可用，并精简 UI
+        searching: true,      // 开启搜索
+        lengthChange: false,  // 隐藏 “Show N entries”
+        info: false,          // 隐藏 “Showing 1 to … of …”
+        dom: 'tpr',           // 只保留 table(t) + paging(p) + processing(r)
+
         columnDefs: [
-          { targets: [2,4,5], visible: false }, // hide Affiliation, Date, Notes
-          { targets: [0,3], className:'text-nowrap' },
+          { targets: [2,4,5], visible: false },  // 继续隐藏 Affiliation / Date / Notes
+          { targets: [0,3], className: 'text-nowrap' },
         ]
-      });
+       });
+      const $wrapper = table.closest('.dataTables_wrapper');
+      $wrapper.find('input[type=search]')
+        .off('input.dt')
+        .on('input.dt', function () {
+        dt.search(this.value).draw();
+       });
     }
 
     // Wire up panes
