@@ -22,9 +22,10 @@
     .clean .col-lg-4{ display:none !important; }
     .clean .col-lg-8{ flex:0 0 100%; max-width:100%; }
     .clean .footer-note{ display:none !important; }
+    .clean #btnToggleClean{ display:none!important; }
   </style>
 </head>
-<body>
+<body class="clean">
   <div class="container py-4">
     <div class="d-flex align-items-center justify-content-between mb-3">
       <h1 class="brand h3 mb-0">Multi‑Benchmark Leaderboard</h1>
@@ -995,7 +996,7 @@ XiYanSQL-QwenCoder-7B,38.61%">
     const CLEAN_KEY = 'mb-clean-mode';
     function setClean(on){ document.body.classList.toggle('clean', !!on); localStorage.setItem(CLEAN_KEY, on ? '1' : '0'); }
     document.getElementById('btnToggleClean')?.addEventListener('click', ()=>{ setClean(!document.body.classList.contains('clean')); });
-    (function(){ const p = new URLSearchParams(location.search); const force = p.get('mode')==='clean'; const mem = localStorage.getItem(CLEAN_KEY)==='1'; setClean(force||mem); })();
+    (function(){ const p = new URLSearchParams(location.search); const force = p.get('mode')==='clean'; const mem = localStorage.getItem(CLEAN_KEY)==='1'; setClean(force ? true : mem); })();
   </script>
 
   <!-- Details Modal -->
