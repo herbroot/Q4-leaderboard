@@ -1,52 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Multi-Benchmark Leaderboard</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>NL2SQL Multi-Benchmark Leaderboard</title>
 
-  <!-- 本地 CSS -->
-  <link rel="stylesheet" href="./assets/bootstrap.min.css" />
-  <link rel="stylesheet" href="./assets/dataTables.bootstrap5.min.css" />
+  <!-- 本地依赖（保持你仓库中的路径） -->
+  <link rel="stylesheet" href="./assets/bootstrap.min.css"/>
+  <link rel="stylesheet" href="./assets/dataTables.bootstrap5.min.css"/>
 
   <style>
     body { background:#f7f9fc; }
-    .brand { font-weight:800; letter-spacing:0.3px; }
+    .brand { font-weight:800; letter-spacing:.3px; }
     .subtle { color:#6c757d; }
     .score { font-weight:700; }
-    .badge-date { background:#e9ecef; color:#212529; border:1px solid #dee2e6; }
-    .footer-note { font-size:.9rem; }
-    .dropzone { border:2px dashed #ced4da; border-radius:12px; background:#fff; padding:1rem; }
-    .example { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:.85rem; }
     .table thead th { white-space:nowrap; }
 
-    /* Clean (presentation) mode */
-    .clean .dropzone{ display:none !important; }
-    .clean .col-lg-4{ display:none !important; }
-    .clean .col-lg-8{ flex:0 0 100%; max-width:100%; }
-    .clean .footer-note{ display:none !important; }
-    .clean #btnToggleClean{ display:none!important; }
+    /* 让表头与内容稳定对齐 */
+    table.leaderboard-table { table-layout: fixed; width: 100%; }
+    table.leaderboard-table th:nth-child(1),
+    table.leaderboard-table td:nth-child(1){ width: 80px; }
+    table.leaderboard-table th:nth-child(2),
+    table.leaderboard-table td:nth-child(2){ width: 60%; }
+    table.leaderboard-table th:nth-child(3),
+    table.leaderboard-table td:nth-child(3){ width: 200px; }
+    .dataTables_scrollHeadInner,
+    .dataTables_scrollHeadInner > table { width: 100% !important; }
 
-    /* 隐藏不需要的 DataTables 控件 */
+    /* 精简 DataTables UI：保留搜索与分页 */
     .dataTables_length, .dataTables_info { display: none !important; }
-    /* 隐藏卡片右上的“按 Score 降序”字样与下方提示 */
-    .card .card-body > .d-flex .subtle { display: none !important; }
-    .subtle.small.mt-2 { display: none !important; }
   </style>
 </head>
-
-<body class="clean">
+<body>
   <div class="container py-4">
     <div class="d-flex align-items-center justify-content-between mb-3">
-      <h1 class="brand h3 mb-0">Multi-Benchmark Leaderboard</h1>
-      <div class="text-end subtle">Static HTML · Paste or Upload CSV · Auto-rank by Score (desc)</div>
+      <h1 class="brand h3 mb-0">NL2SQL Multi-Benchmark Leaderboard</h1>
+      <!-- 右上角副标题已移除 -->
     </div>
 
-    <div class="d-flex justify-content-end mb-2">
-      <button id="btnToggleClean" class="btn btn-sm btn-outline-secondary">Clean View</button>
-    </div>
-
-    <!-- Tabs -->
+    <!-- 顶部 Tab -->
     <ul class="nav nav-tabs" id="benchTabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="tab-1" data-bs-toggle="tab" data-bs-target="#panel-1" type="button" role="tab" aria-selected="true">Spider</button>
@@ -62,10 +54,10 @@
       </li>
     </ul>
 
-    <div class="tab-content pt-3" id="benchContent">
+    <div class="tab-content pt-3">
 
-      <!-- ========== Panel 1 ========== -->
-      <div class="tab-pane fade show active" role="tabpanel" id="panel-1" aria-labelledby="tab-1"
+      <!-- ===== Spider ===== -->
+      <div class="tab-pane fade show active" id="panel-1" role="tabpanel" aria-labelledby="tab-1"
            data-raw="model,exec,exact match
 Qwen3-Coder-30B-A3B-Instruct,49.50%,42.60%
 Qwen2.5-Coder-14B-Instruct,56.20%,50.80%
@@ -80,67 +72,27 @@ CodeLlama-34b-Instruct-hf,41.50%,33.70%
 CodeLlama-13b-Instruct-hf,48.10%,36.00%
 CodeLlama-7b-Instruct-hf,39.10%,28.10%
 Seed-Coder-8B-Instruct,37.40%,31.40%">
-
-        <div class="row g-3 align-items-stretch">
-          <!-- 左侧上传/粘贴（clean 隐藏） -->
-          <div class="col-lg-4">
-            <div class="dropzone h-100">
-              <h5 class="mb-2">Paste / Upload Data</h5>
-              <p class="subtle mb-2">Leaderboard CSV（必需）：<span class="example">Method, Score</span>；可选：<span class="example">Affiliation, Date, Notes</span>。</p>
-              <div class="mb-2">
-                <label class="form-label small mb-1">Leaderboard CSV（.csv）</label>
-                <input type="file" accept=".csv" class="form-control form-control-sm file-input">
-              </div>
-              <textarea class="form-control form-control-sm paste-area" rows="6" placeholder="粘贴 CSV 或从 Excel 复制"></textarea>
-
-              <hr class="my-3">
-              <p class="subtle mb-2">（可选）明细 CSV：点击表格行时弹出“子任务/类别明细”。至少包含 <span class="example">Method</span> 列，其它列将全部展示；支持宽表或 tidy 格式。</p>
-              <div class="mb-2">
-                <label class="form-label small mb-1">Details CSV（.csv，可选）</label>
-                <input type="file" accept=".csv" class="form-control form-control-sm details-input">
-              </div>
-              <textarea class="form-control form-control-sm details-area" rows="4" placeholder="（可选）在此粘贴明细 CSV，用于 SQL-Eval 等包含大量小项的基准"></textarea>
-
-              <div class="d-flex gap-2 mt-2">
-                <button class="btn btn-primary btn-sm btn-render">Render Leaderboard</button>
-                <button class="btn btn-outline-secondary btn-sm btn-clear">Clear</button>
-                <button class="btn btn-outline-success btn-sm btn-export">Export CSV</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 右侧榜单 -->
-          <div class="col-lg-8">
-            <div class="card h-100">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h5 class="card-title mb-0">Leaderboard</h5>
-                  <div class="subtle">按 <span class="fw-semibold">Score</span> 降序</div>
-                </div>
-
-                <div class="table-responsive">
-                  <table class="table table-striped table-hover align-middle leaderboard-table" style="width:100%">
-                    <thead>
-                      <tr>
-                        <th>Rank</th>
-                        <th>Method</th>
-                        <th>Affiliation</th>
-                        <th>Score</th>
-                        <th>Date</th>
-                        <th>Notes</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-              </div>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Leaderboard</h5>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover align-middle leaderboard-table" style="width:100%">
+                <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model</th>
+                  <th>Score (execute accuracy)</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ========== Panel 2 ========== -->
-      <div class="tab-pane fade" role="tabpanel" id="panel-2" aria-labelledby="tab-2"
+      <!-- ===== SQL-Eval ===== -->
+      <div class="tab-pane fade" id="panel-2" role="tabpanel" aria-labelledby="tab-2"
            data-raw="model,score
 XiYanSQL-QwenCoder-32B-2504,69.05%
 XiYanSQL-QwenCoder-14B,71.14%
@@ -154,65 +106,27 @@ deepseek-coder-33b-instruct,71.37%
 CodeLlama-7b-Instruct-hf,26.15%
 deepseek-coder-33b-instruct,71.37%
 Seed-Coder-8B-Instruct（glmprompt）,67.73%">
-
-        <div class="row g-3 align-items-stretch">
-          <div class="col-lg-4">
-            <div class="dropzone h-100">
-              <h5 class="mb-2">Paste / Upload Data</h5>
-              <div class="mb-2">
-                <label class="form-label small mb-1">Leaderboard CSV（.csv）</label>
-                <input type="file" accept=".csv" class="form-control form-control-sm file-input">
-              </div>
-              <textarea class="form-control form-control-sm paste-area" rows="6"></textarea>
-
-              <hr class="my-3">
-              <div class="mb-2">
-                <label class="form-label small mb-1">Details CSV（.csv，可选）</label>
-                <input type="file" accept=".csv" class="form-control form-control-sm details-input">
-              </div>
-              <textarea class="form-control form-control-sm details-area" rows="4"></textarea>
-
-              <div class="d-flex gap-2 mt-2">
-                <button class="btn btn-primary btn-sm btn-render">Render Leaderboard</button>
-                <button class="btn btn-outline-secondary btn-sm btn-clear">Clear</button>
-                <button class="btn btn-outline-success btn-sm btn-export">Export CSV</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-8">
-            <div class="card h-100">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h5 class="card-title mb-0">Leaderboard</h5>
-                  <div class="subtle">按 <span class="fw-semibold">Score</span> 降序</div>
-                </div>
-
-                <div class="table-responsive">
-                  <table class="table table-striped table-hover align-middle leaderboard-table" style="width:100%">
-                    <thead>
-                      <tr>
-                        <th>Rank</th>
-                        <th>Method</th>
-                        <th>Affiliation</th>
-                        <th>Score</th>
-                        <th>Date</th>
-                        <th>Notes</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-
-                <div class="subtle small mt-2">提示：点击表格行可打开 <strong>明细</strong>（若提供了 Details CSV）。</div>
-              </div>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Leaderboard</h5>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover align-middle leaderboard-table" style="width:100%">
+                <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model</th>
+                  <th>Score (execute accuracy)</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ========== Panel 3 ========== -->
-      <div class="tab-pane fade" role="tabpanel" id="panel-3" aria-labelledby="tab-3"
+      <!-- ===== BIRD ===== -->
+      <div class="tab-pane fade" id="panel-3" role="tabpanel" aria-labelledby="tab-3"
            data-raw="model,score
 XiYanSQL-QwenCoder-32B-2504,40.50125
 Qwen3-Coder-30B-A3B-Instruct,33.42125
@@ -227,65 +141,27 @@ CodeLlama-7b-Instruct-hf,16.453125
 Seed-Coder-8B-Instruct,28.52625
 XiYanSQL-QwenCoder-14B,24.898125
 XiYanSQL-QwenCoder-7B,30.88">
-
-        <div class="row g-3 align-items-stretch">
-          <div class="col-lg-4">
-            <div class="dropzone h-100">
-              <h5 class="mb-2">Paste / Upload Data</h5>
-              <div class="mb-2">
-                <label class="form-label small mb-1">Leaderboard CSV（.csv）</label>
-                <input type="file" accept=".csv" class="form-control form-control-sm file-input">
-              </div>
-              <textarea class="form-control form-control-sm paste-area" rows="6"></textarea>
-
-              <hr class="my-3">
-              <div class="mb-2">
-                <label class="form-label small mb-1">Details CSV（.csv，可选）</label>
-                <input type="file" accept=".csv" class="form-control form-control-sm details-input">
-              </div>
-              <textarea class="form-control form-control-sm details-area" rows="4"></textarea>
-
-              <div class="d-flex gap-2 mt-2">
-                <button class="btn btn-primary btn-sm btn-render">Render Leaderboard</button>
-                <button class="btn btn-outline-secondary btn-sm btn-clear">Clear</button>
-                <button class="btn btn-outline-success btn-sm btn-export">Export CSV</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-8">
-            <div class="card h-100">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h5 class="card-title mb-0">Leaderboard</h5>
-                  <div class="subtle">按 <span class="fw-semibold">Score</span> 降序</div>
-                </div>
-
-                <div class="table-responsive">
-                  <table class="table table-striped table-hover align-middle leaderboard-table" style="width:100%">
-                    <thead>
-                      <tr>
-                        <th>Rank</th>
-                        <th>Method</th>
-                        <th>Affiliation</th>
-                        <th>Score</th>
-                        <th>Date</th>
-                        <th>Notes</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-
-                <div class="subtle small mt-2">提示：点击表格行可打开 <strong>明细</strong>（若提供了 Details CSV）。</div>
-              </div>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Leaderboard</h5>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover align-middle leaderboard-table" style="width:100%">
+                <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model</th>
+                  <th>Score (execute accuracy)</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ========== Panel 4 ========== -->
-      <div class="tab-pane fade" role="tabpanel" id="panel-4" aria-labelledby="tab-4"
+      <!-- ===== NL2GQL ===== -->
+      <div class="tab-pane fade" id="panel-4" role="tabpanel" aria-labelledby="tab-4"
            data-raw="model,score
 XiYanSQL-QwenCoder-32B-2504,54.01%
 Qwen3-Coder-30B-A3B-Instruct,49.29%
@@ -300,69 +176,27 @@ CodeLlama-7b-Instruct-hf,43.99%
 Seed-Coder-8B-Instruct,46.39%
 XiYanSQL-QwenCoder-14B,30.34%
 XiYanSQL-QwenCoder-7B,38.61%">
-
-        <div class="row g-3 align-items-stretch">
-          <div class="col-lg-4">
-            <div class="dropzone h-100">
-              <h5 class="mb-2">Paste / Upload Data</h5>
-              <div class="mb-2">
-                <label class="form-label small mb-1">Leaderboard CSV（.csv）</label>
-                <input type="file" accept=".csv" class="form-control form-control-sm file-input">
-              </div>
-              <textarea class="form-control form-control-sm paste-area" rows="6"></textarea>
-
-              <hr class="my-3">
-              <div class="mb-2">
-                <label class="form-label small mb-1">Details CSV（.csv，可选）</label>
-                <input type="file" accept=".csv" class="form-control form-control-sm details-input">
-              </div>
-              <textarea class="form-control form-control-sm details-area" rows="4"></textarea>
-
-              <div class="d-flex gap-2 mt-2">
-                <button class="btn btn-primary btn-sm btn-render">Render Leaderboard</button>
-                <button class="btn btn-outline-secondary btn-sm btn-clear">Clear</button>
-                <button class="btn btn-outline-success btn-sm btn-export">Export CSV</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-8">
-            <div class="card h-100">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h5 class="card-title mb-0">Leaderboard</h5>
-                  <div class="subtle">按 <span class="fw-semibold">Score</span> 降序</div>
-                </div>
-
-                <div class="table-responsive">
-                  <table class="table table-striped table-hover align-middle leaderboard-table" style="width:100%">
-                    <thead>
-                      <tr>
-                        <th>Rank</th>
-                        <th>Method</th>
-                        <th>Affiliation</th>
-                        <th>Score</th>
-                        <th>Date</th>
-                        <th>Notes</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
-                </div>
-
-                <div class="subtle small mt-2">提示：点击表格行可打开 <strong>明细</strong>（若提供了 Details CSV）。</div>
-              </div>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Leaderboard</h5>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover align-middle leaderboard-table" style="width:100%">
+                <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Model</th>
+                  <th>Score (execute accuracy)</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
 
-    </div><!-- /tab-content -->
-
-    <p class="mt-4 text-muted footer-note">
-      Tip: Rename tabs to your benchmarks. Host this file on GitHub Pages to share. All processing is client-side.
-    </p>
-  </div>
+    </div><!-- /.tab-content -->
+  </div><!-- /.container -->
 
   <!-- 本地 JS（顺序不能乱） -->
   <script src="./assets/jquery-3.7.1.min.js"></script>
@@ -372,203 +206,87 @@ XiYanSQL-QwenCoder-7B,38.61%">
   <script src="./assets/dataTables.bootstrap5.min.js"></script>
 
   <script>
-    const TAB_IDS = ["panel-1","panel-2","panel-3","panel-4"];
-    const LS_PREFIX = 'mb-leaderboard:';
-    const CLEAN_KEY = 'mb-clean-mode';
-
-    // helpers
-    function normalizeHeader(h){ return String(h || '').trim().toLowerCase(); }
-    function toDateBadge(s){
-      if(!s) return '';
-      const d = new Date(s);
-      if(isNaN(d)) return escapeHtml(s);
-      const opts = { year:'numeric', month:'short', day:'2-digit' };
-      return `<span class="badge rounded-pill badge-date" title="${escapeHtml(s)}">${d.toLocaleDateString(undefined, opts)}</span>`;
-    }
-    function escapeHtml(s){ return String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
-    function parseCsvText(text){
-      const out = Papa.parse(text.trim(), { header:true, skipEmptyLines:true });
+    // —— 小工具 —— //
+    const norm = s => String(s||'').trim().toLowerCase();
+    function parseCSV(text){
+      const out = Papa.parse(String(text||'').trim(), {header:true, skipEmptyLines:true});
       return out.data || [];
     }
-
-    function prepareRows(rows){
-      return rows.map(r => {
-        const keys = Object.fromEntries(Object.keys(r).map(k=>[normalizeHeader(k),k]));
-        const get = alts => { const hit = alts.find(a=>keys[a]); return hit ? r[keys[hit]] : ''; };
-        const method = get(['method','model','name','模型','方法']);
-        const affiliation = get(['affiliation','team','org','organization','机构','团队','组织']);
-        const scoreStrRaw = get(['score','acc','accuracy','avg','average','分数','正确率','得分','平均','score(%)']);
-        const scoreExecStr = get(['exec','执行']);
-        const scoreEmStr   = get(['exact match','exact_match','em','精确匹配']);
-        const date = get(['date','submitted','time','日期']);
-        const notes = get(['notes','comment','description','备注']);
-        let score = parseFloat(String(scoreStrRaw).replace(/[^0-9.+-]/g,''));
-        if(!Number.isFinite(score)){
-          const tryExec = parseFloat(String(scoreExecStr).replace(/[^0-9.+-]/g,''));
-          const tryEm   = parseFloat(String(scoreEmStr).replace(/[^0-9.+-]/g,''));
-          if(Number.isFinite(tryExec)) score = tryExec; else if(Number.isFinite(tryEm)) score = tryEm;
-        }
-        return { method, affiliation, score, date, notes };
-      }).filter(r => r.method && Number.isFinite(r.score));
+    function pick(row, keys){
+      const map = Object.fromEntries(Object.keys(row).map(k => [norm(k), k]));
+      const hit = keys.find(k => map[k]);
+      return hit ? row[map[hit]] : '';
     }
 
-    function renderTable(pane, rows){
-      const table = $(pane).find('table.leaderboard-table');
-      if ($.fn.dataTable.isDataTable(table)) { table.DataTable().clear().destroy(); }
-      rows.sort((a,b)=> b.score - a.score);
+    // 生成表格
+    function renderPane(pane){
+      const raw = pane.getAttribute('data-raw') || '';
+      if(!raw.trim()) return;
 
-      const tbody = table.find('tbody').empty();
+      // 解析行：优先 score；否则回落 exec / exact match
+      const rows = parseCSV(raw).map(r => {
+        const model = pick(r, ['model','method','name','模型','方法']);
+        let score = parseFloat(String(pick(r, ['score','acc','accuracy','平均','score(%)'])).replace(/[^0-9.+-]/g,''));
+        if(!Number.isFinite(score)){
+          const exec = parseFloat(String(pick(r, ['exec','执行'])).replace(/[^0-9.+-]/g,''));
+          const em   = parseFloat(String(pick(r, ['exact match','exact_match','em','精确匹配'])).replace(/[^0-9.+-]/g,''));
+          if(Number.isFinite(exec)) score = exec; else if(Number.isFinite(em)) score = em;
+        }
+        return {model, score};
+      }).filter(r => r.model && Number.isFinite(r.score));
+
+      // 排序 & 填充 tbody
+      rows.sort((a,b)=> b.score - a.score);
+      const $table = $(pane).find('table.leaderboard-table');
+      const tbody = $table.find('tbody').empty()[0];
       rows.forEach((r, i) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="fw-semibold text-nowrap">${i+1}</td>
-          <td>
-            <div class="fw-semibold">${escapeHtml(r.method)}</div>
-            ${r.affiliation ? `<div class="subtle small">${escapeHtml(r.affiliation)}</div>` : ''}
-          </td>
-          <td>${escapeHtml(r.affiliation || '')}</td>
-          <td class="score text-nowrap">${(Math.round(r.score * 100)/100).toFixed(2)}</td>
-          <td>${toDateBadge(r.date)}</td>
-          <td>${escapeHtml(r.notes || '')}</td>`;
-        tbody[0].appendChild(tr);
+          <td class="fw-semibold">${r.model}</td>
+          <td class="score text-nowrap">${(Math.round(r.score*100)/100).toFixed(2)}</td>`;
+        tbody.appendChild(tr);
       });
 
-      table.DataTable({
+      // 初始化 DataTable（只留搜索与分页）
+      if ($.fn.dataTable.isDataTable($table)) $table.DataTable().destroy();
+      const dt = $table.DataTable({
         pageLength: 25,
-        order: [[3,'desc']],
         deferRender: true,
-        autoWidth: true,
-        scrollX: true,
-
-        searching: true,     // 启用搜索
-        lengthChange: false, // 隐藏 show N
-        info: false,         // 隐藏 showing...
-        dom: 'ftpr',         // 保留 filter + table + paging (+ processing)
-
+        autoWidth: false,
+        scrollX: false,
+        order: [[2,'desc']],
+        lengthChange: false,
+        info: false,
+        searching: true,
+        dom: 'tpr',  // table + paging + processing
         columnDefs: [
-          { targets: [2,4,5], visible: false }, // 隐藏 Affiliation/Date/Notes
-          { targets: [0,3], className:'text-nowrap' },
+          { targets: 0, className:'text-nowrap', width: 80 },
+          { targets: 1, width: '60%' },
+          { targets: 2, className:'text-nowrap', width: 200 }
         ]
       });
+      dt.columns.adjust();
     }
 
-    // 绑定每个面板
-    const detailsStore = new Map(); // paneId -> { header, map: Map(method -> rows) }
-    TAB_IDS.forEach(id => {
-      const pane = document.getElementById(id);
-      const paste = pane.querySelector('.paste-area');
-      const fileInput = pane.querySelector('.file-input');
-      const btnRender = pane.querySelector('.btn-render');
-      const btnClear = pane.querySelector('.btn-clear');
-      const btnExport = pane.querySelector('.btn-export');
-      const detailsInput = pane.querySelector('.details-input');
-      const detailsArea = pane.querySelector('.details-area');
+    // 初始化所有面板
+    document.querySelectorAll('.tab-pane').forEach(renderPane);
 
-      const doRender = (text) => {
-        const rows = prepareRows(parseCsvText(text));
-        renderTable(pane, rows);
-        const raw = text.trim();
-        pane.dataset.raw = raw;
-        localStorage.setItem(`${LS_PREFIX}${id}:leader`, raw);
-      };
-
-      // 事件
-      btnRender?.addEventListener('click', () => {
-        if(!paste.value.trim()){
-          alert('请先粘贴 Leaderboard CSV，或上传文件。');
-        } else {
-          doRender(paste.value);
-        }
-        const dtext = detailsArea.value.trim();
-        if(dtext){
-          const drows = parseCsvText(dtext);
-          const map = new Map();
-          const header = Object.keys(drows[0] || {});
-          drows.forEach(r => {
-            const key = Object.keys(r).find(k => normalizeHeader(k)==='method');
-            const method = key ? r[key] : '';
-            if(!method) return;
-            if(!map.has(method)) map.set(method, []);
-            map.get(method).push(r);
-          });
-          detailsStore.set(id, { header, map });
-          localStorage.setItem(`${LS_PREFIX}${id}:details`, dtext);
-        }
+    // Tab 切换后修正列宽
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(btn => {
+      btn.addEventListener('shown.bs.tab', e => {
+        const pane = document.querySelector(e.target.getAttribute('data-bs-target'));
+        const tbl = $(pane).find('table.leaderboard-table');
+        if ($.fn.dataTable.isDataTable(tbl)) tbl.DataTable().columns.adjust();
       });
-
-      btnClear?.addEventListener('click', () => {
-        paste.value = '';
-        detailsArea.value = '';
-        pane.dataset.raw = '';
-        detailsStore.delete(id);
-        localStorage.removeItem(`${LS_PREFIX}${id}:leader`);
-        localStorage.removeItem(`${LS_PREFIX}${id}:details`);
-        const table = $(pane).find('table.leaderboard-table');
-        if ($.fn.dataTable.isDataTable(table)) table.DataTable().clear().draw();
-      });
-
-      fileInput?.addEventListener('change', (e)=>{
-        const file = e.target.files?.[0];
-        if(!file) return;
-        if(!/\.csv$/i.test(file.name)) return alert('仅支持 .csv');
-        const reader = new FileReader();
-        reader.onload = () => { paste.value = reader.result; doRender(reader.result); };
-        reader.readAsText(file);
-      });
-
-      detailsInput?.addEventListener('change', (e)=>{
-        const file = e.target.files?.[0];
-        if(!file) return;
-        if(!/\.csv$/i.test(file.name)) return alert('Details 仅支持 .csv');
-        const reader = new FileReader();
-        reader.onload = () => { detailsArea.value = reader.result; };
-        reader.readAsText(file);
-      });
-
-      btnExport?.addEventListener('click', () => {
-        const raw = pane.dataset.raw || paste.value || '';
-        if(!raw.trim()) return alert('没有可导出的 Leaderboard 数据');
-        const blob = new Blob([raw], {type:'text/csv;charset=utf-8;'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `leaderboard-${id}.csv`;
-        document.body.appendChild(a); a.click(); a.remove();
-      });
-
-      // 恢复缓存或使用内置 data-raw 初始化
-      const cachedLeader = localStorage.getItem(`${LS_PREFIX}${id}:leader`);
-      if (cachedLeader) {
-        paste.value = cachedLeader;
-        doRender(cachedLeader);
-      } else if (pane.dataset.raw) {
-        paste.value = pane.dataset.raw;
-        doRender(pane.dataset.raw);
-      }
-      const cachedDetails = localStorage.getItem(`${LS_PREFIX}${id}:details`);
-      if (cachedDetails) { detailsArea.value = cachedDetails; }
     });
 
-    // Clean View toggle（仍然可用）
-    function setClean(on){ document.body.classList.toggle('clean', !!on); localStorage.setItem(CLEAN_KEY, on ? '1' : '0'); }
-    document.getElementById('btnToggleClean')?.addEventListener('click', ()=>{ setClean(!document.body.classList.contains('clean')); });
-    (function(){ const p = new URLSearchParams(location.search); const force = p.get('mode')==='clean'; const mem = localStorage.getItem(CLEAN_KEY)==='1'; setClean(force || mem); })();
+    // 窗口尺寸变化时也调整
+    window.addEventListener('resize', () => {
+      $('.leaderboard-table').each(function(){
+        if ($.fn.dataTable.isDataTable(this)) $(this).DataTable().columns.adjust();
+      });
+    });
   </script>
-
-  <!-- Details Modal（保留，用于点击行查看明细） -->
-  <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Details</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="table-responsive">
-            <table class="table table-sm table-striped" id="detailsTable" style="width:100%"></table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
